@@ -1,0 +1,21 @@
+\begin{tikzpicture}[xscale=1.00,yscale=1.00]
+  \begin{axis}[xlabel={Y-Axis Label (Unit)},ylabel={Y-Axis Label (Unit)},tick scale binop=\times,clip=false,every y tick scale label/.style={at={(yticklabel* cs:1.05,-5)},anchor=near yticklabel},every x tick scale label/.style={at={(axis description cs:1.0,-0.07)},anchor=near xticklabel},name=myaxis]
+    \addplot[scatter,mark=*,red,scatter/use mapped color={draw=red,fill=red},] table[x=x,y=y] {
+      x y
+      1.0  1.0
+      2.0  2.0
+      3.0  3.0
+      4.0  4.0
+      5.0  5.0
+      6.0  6.0
+      7.0  7.0
+      8.0  8.0
+      9.0  9.0
+      10.0  10.0
+    };
+    \addlegendentry{X}
+  \end{axis}
+    \begin{pgfonlayer}{background}
+      \draw[preaction={fill=black,opacity=.5, transform canvas={xshift=3,yshift=-3}}, black][fill=white]    (myaxis.north west) rectangle (myaxis.south east);
+    \end{pgfonlayer}
+  \end{tikzpicture}
