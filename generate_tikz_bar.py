@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from math import pow, log10, floor
+from math import pow, log10, floor, ceil
 import argparse
 
 pattern_types_tikz = ['north east lines', 'north west lines', 'grid', 'crosshatch', 'dots', 'crosshatch dots']
@@ -19,15 +19,26 @@ def compute_bar_widths(data):
   return bar_width
 
 def scale_data(data, ymin, ymax):
-  return [[(value / (ymax - ymin)) * 100.0 for value in row] for row in data]
+  return [[((value - ymin) / (ymax - ymin)) * 100.0 for value in row] for row in data]
+
+def upper_bound(x):
+  return round(ceil(x), -int(floor(log10(ceil(x)))))
+
+def lower_bound(x):
+  assert x < 0
+  return -1 * upper_bound(-x)
 
 def get_yrange(data, args):
   ymin, ymax = (args.ymin, args.ymax)
   if ymax is None:
     data_max = max(map(max, data))
-    ymax = round(data_max, -int(floor(log10(data_max))))
+    ymax = upper_bound(data_max)
   if ymin is None:
-    ymin = 0
+    data_min = min(map(min, data))
+    if data_min >= 0:
+      ymin = 0
+    else:
+      ymin = lower_bound(data_min)
   return ymin, ymax
 
 def validate_data(data, ncols):
@@ -57,20 +68,17 @@ def generate_tikz(args):
   if yscale is None:
     yscale = 0.1
 
-  header = '''\
-    \\begin{tikzpicture}[xscale=%.2f,yscale=%.2f]
-
-    \\draw[preaction={fill=black,opacity=.5, transform canvas={xshift=1mm,yshift=-1mm}}, black][fill=white] (0,0) rectangle (100, 100);
-
-    \\draw[dashed, gray] (-1, 25) -- (101, 25);
-    \\draw[dashed, gray] (-1, 50) -- (101, 50);
-    \\draw[dashed, gray] (-1, 75) -- (101, 75);
-
+  header = '''\\begin{tikzpicture}[xscale=%.2f,yscale=%.2f]
+  \\draw[preaction={fill=black,opacity=.5, transform canvas={xshift=3,yshift=-3}}, black][fill=white] (0,0) rectangle (100, 100);
   ''' % (xscale, yscale)
 
-  footer = '''\
-    \\end{tikzpicture}\
+  gridlines = '''\
+  \\draw[dashed, gray] (-1, 25) -- (101, 25);
+  \\draw[dashed, gray] (-1, 50) -- (101, 50);
+  \\draw[dashed, gray] (-1, 75) -- (101, 75);
   '''
+
+  footer = '\\end{tikzpicture}'
 
   # Obtain the y label
   ylabel = args.ylabel
@@ -96,11 +104,19 @@ def generate_tikz(args):
 
   # Generate the y-axis marks
   ymarks_tikz = ''
-  for mark in [25.0, 50.0, 75.0]:
-    ymark = ymin + (mark * (ymax - ymin) / 100.0)
-    if args.logscale:
-      ymark = pow(10, ymark)
-    ymarks_tikz += '  \\draw[thick, black] (-5, %.2f) node {%s};\n' % (mark, intify(ymark))
+  if args.logscale:
+    gridlines = ''
+    step = 100 / (ymax - ymin)
+    for power in range(int(ymin) + 1, int(ymax)):
+      ymark = pow(10, power)
+      mark = (power - ymin) * step
+      gridlines += '  \\draw[dashed, gray] (-1, %.2f) -- (101, %.2f);\n' % (mark, mark)
+      ymarks_tikz += '  \\draw[thick, black] (-6, %.2f) node[align=right] {%s};\n' % (mark, intify(ymark))
+    gridlines += '\n'
+  else:
+    for mark in [25.0, 50.0, 75.0]:
+      ymark = float(ymin + (mark * (ymax - ymin) / 100.0))
+      ymarks_tikz += '  \\draw[thick, black] (-6, %.2f) node[align=right] {%s};\n' % (mark, intify(ymark))
 
   ymarks_tikz += '\n'
 
@@ -141,12 +157,16 @@ def generate_tikz(args):
     pattern = pattern_iter.next()
     blabels_tikz += '  \draw[thick, pattern=%s, pattern color=%s] (%.2f, 102.5) rectangle (%.2f, 107.5);\n' \
                     % (pattern[0], pattern[1], blabel[0], blabel[0] + 5)
-    blabels_tikz += '  \draw[thick, black] (%.2f, 105) node[text width=10] {%s};\n' % (blabel[0] + 10, blabel[1])
+    blabels_tikz += '  \draw[thick, black] (%.2f, 105) node[text width=20] {%s};\n' % (blabel[0] + 10, blabel[1])
 
   blabels_tikz += '\n'
 
+  # Invalidate legend if requested
+  if args.nolegend:
+    blabels_tikz = ''
+
   # Generate entire tikz code and dump it to output file
-  tikz = header + ymarks_tikz + ylabel_tikz + plot_data_tikz + xlabels_tikz + blabels_tikz + footer
+  tikz = header + gridlines + ymarks_tikz + ylabel_tikz + plot_data_tikz + xlabels_tikz + blabels_tikz + footer
   output = open(args.out, 'w')
   output.write(tikz)
 
@@ -160,6 +180,7 @@ def main():
   parser.add_argument('--xscale', type=float, help='Scale for x-axis.')
   parser.add_argument('--yscale', type=float, help='Scale for y-axis.')
   parser.add_argument('--logscale', '-l', action='store_true', help='Set logscale for y-axis')
+  parser.add_argument('--nolegend', action='store_true', help='Don\'t generate a legend.')
   args = parser.parse_args()
   generate_tikz(args)
 

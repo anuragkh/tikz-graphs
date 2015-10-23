@@ -27,7 +27,7 @@ def generate_tikz(args):
   if xlabel is None:
     xlabel = 'Y-Axis Label (Unit)'
 
-  plot_opts = 'xlabel={%s},ylabel={%s},tick scale binop=\\times' % (xlabel, ylabel)
+  plot_opts = 'xlabel={%s},ylabel={%s},tick scale binop=\\times,clip=false' % (xlabel, ylabel)
   if args.xmin is not None:
     plot_opts += ',xmin=%.2f' % args.xmin
   if args.xmax is not None:
@@ -37,8 +37,9 @@ def generate_tikz(args):
   if args.ymax is not None:
     plot_opts += ',ymax=%.2f' % args.ymax
 
-  plot_opts += ',every y tick scale label/.style={at={(yticklabel* cs:1.03,0cm)},anchor=near yticklabel}'
-  # plot_opts += ',every x tick scale label/.style={at={(xticklabel* cs:0,1.03cm)},anchor=near xticklabel}'
+  plot_opts += ',every y tick scale label/.style={at={(yticklabel* cs:1.05,-5)},anchor=near yticklabel}'
+  plot_opts += ',every x tick scale label/.style={at={(axis description cs:1.0,-0.07)},anchor=near xticklabel}'
+  plot_opts += ',name=myaxis'
 
   plot_header_tikz = '  \\begin{axis}[%s]\n' % plot_opts
   plot_footer_tikz = '  \\end{axis}\n'
@@ -73,17 +74,25 @@ def generate_tikz(args):
         continue
       plot_data += '      %s  %s\n' % (x, y)
     plot_data += '    };\n'
-    plot_data += '    \\addlegendentry{%s}' % label
+    plot_data += '    \\addlegendentry{%s}\n' % label
+
+  plot_shadow = '''\
+    \\begin{pgfonlayer}{background}
+      \\draw[preaction={fill=black,opacity=.5, transform canvas={xshift=3,yshift=-3}}, black][fill=white]\
+    (myaxis.north west) rectangle (myaxis.south east);
+    \\end{pgfonlayer}
+  '''
 
   # Generate entire tikz code and dump it to output file
-  tikz = header_tikz + plot_header_tikz + plot_data + plot_footer_tikz + footer_tikz
+  tikz = header_tikz + plot_header_tikz + plot_data + plot_footer_tikz + plot_shadow + footer_tikz
   output = open(args.out, 'w')
   output.write(tikz)
 
 def main():
   parser = argparse.ArgumentParser(description='Generates a TiKZ bar plot from an input file.')
-  parser.add_argument('-d', '--data', type=str, nargs='+', required=True, help='The input data files.')
-  parser.add_argument('-l', '--legend', type=str, nargs='+', required=True,
+  parser.add_argument('-d', '--data', type=str, nargs='+', metavar='DATA_FILE', required=True,
+                      help='The input data files.')
+  parser.add_argument('-l', '--legend', type=str, nargs='+', metavar='LEGEND_ENTRY', required=True,
                       help='The entries for the legend. Should correspond to the input data files.')
   parser.add_argument('-o', '--out', type=str, metavar='OUTPUT_FILE', required=True, help='The output TiKZ file.')
   parser.add_argument('--xmin', type=float, help='Lower limit to x-axis.')
