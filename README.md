@@ -72,6 +72,5 @@ To generate ps, pdf or jpg files, use the `tikz2ps`,`tikz2pdf`, and `tikz2jpg` s
 
 ## Sample plots
 
-Bar Graph:
-
-![Image of Yaktocat](sample/ps/bar.ps)
+[Bar Graph](sample/pdf/bar.pdf)
+[Line Plot](sample/pdf/line.pdf)
