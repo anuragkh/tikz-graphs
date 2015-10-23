@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Get tikz input
+tikz=$1
+
+# Extract filename
+filename=$(basename "$tikz")
+extension="${filename##*.}"
+filename="${filename%.*}"
+
+# Generate tex
+tex="\documentclass[class=minimal,border=0pt,crop,tikz]{standalone}
+\usepackage{tikz,pgfplots}
+\usepackage[charter]{mathdesign}
+\usepackage[mathcal]{euscript}
+\usepackage{graphicx}
+\usetikzlibrary{patterns,shadows,backgrounds}
+\pgfplotsset{compat=1.12}
+\begin{document}
+\input{$tikz}
+\end{document}"
+echo $tex > tmp.tex
+
+# Compile tex and get pdf
+latex tmp.tex
+dvips tmp.dvi
+mv tmp.ps ${filename}.ps
+
+# Cleanup
+rm -rf tmp.*
