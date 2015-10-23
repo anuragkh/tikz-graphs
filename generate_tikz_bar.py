@@ -51,14 +51,14 @@ def intify(val):
   return val
 
 def generate_tikz(args):
-  input = open(args.data, 'r')
+  inp = open(args.data, 'r')
 
   # Get the bar labels
-  blabels = map(str, input.readline().split())
+  blabels = map(str, inp.readline().split())
   ncols = len(blabels)
 
   # Read the remainder of the file
-  file_data = [line for line in input]
+  file_data = [line for line in inp]
 
   xscale, yscale = args.xscale, args.yscale
 
@@ -68,17 +68,15 @@ def generate_tikz(args):
   if yscale is None:
     yscale = 0.1
 
-  header = '''\\begin{tikzpicture}[xscale=%.2f,yscale=%.2f]
-  \\draw[preaction={fill=black,opacity=.5, transform canvas={xshift=3,yshift=-3}}, black][fill=white] (0,0) rectangle (100, 100);
-  ''' % (xscale, yscale)
+  header_tikz = '\\begin{tikzpicture}[xscale=%.2f,yscale=%.2f]\n\n' % (xscale, yscale)
+  header_tikz += '  \\draw[preaction={fill=black,opacity=.5,transform canvas={xshift=3,yshift=-3}},black][fill=white]' \
+                 ' (0,0) rectangle (100, 100);\n\n'
 
-  gridlines = '''\
-  \\draw[dashed, gray] (-1, 25) -- (101, 25);
-  \\draw[dashed, gray] (-1, 50) -- (101, 50);
-  \\draw[dashed, gray] (-1, 75) -- (101, 75);
-  '''
+  gridlines_tikz = '  \\draw[dashed, gray] (-1, 25) -- (101, 25);\n' \
+                   '  \\draw[dashed, gray] (-1, 50) -- (101, 50);\n' \
+                   '  \\draw[dashed, gray] (-1, 75) -- (101, 75);\n\n'
 
-  footer = '\\end{tikzpicture}'
+  footer_tikz = '\\end{tikzpicture}'
 
   # Obtain the y label
   ylabel = args.ylabel
@@ -105,14 +103,14 @@ def generate_tikz(args):
   # Generate the y-axis marks
   ymarks_tikz = ''
   if args.logscale:
-    gridlines = ''
+    gridlines_tikz = ''
     step = 100 / (ymax - ymin)
     for power in range(int(ymin) + 1, int(ymax)):
       ymark = pow(10, power)
       mark = (power - ymin) * step
-      gridlines += '  \\draw[dashed, gray] (-1, %.2f) -- (101, %.2f);\n' % (mark, mark)
+      gridlines_tikz += '  \\draw[dashed, gray] (-1, %.2f) -- (101, %.2f);\n' % (mark, mark)
       ymarks_tikz += '  \\draw[thick, black] (-6, %.2f) node[align=right] {%s};\n' % (mark, intify(ymark))
-    gridlines += '\n'
+    gridlines_tikz += '\n'
   else:
     for mark in [25.0, 50.0, 75.0]:
       ymark = float(ymin + (mark * (ymax - ymin) / 100.0))
@@ -149,7 +147,7 @@ def generate_tikz(args):
   xlabels_tikz += '\n'
 
   # Generate bar label legend
-  blabel_dist = 100 / ncols
+  blabel_dist = 100.0 / ncols
   blabel_offsets = [x * blabel_dist for x in range(0, len(blabels))]
   blabels_tikz = ''
   pattern_iter = iter(patterns_tikz)
@@ -157,7 +155,7 @@ def generate_tikz(args):
     pattern = pattern_iter.next()
     blabels_tikz += '  \draw[thick, pattern=%s, pattern color=%s] (%.2f, 102.5) rectangle (%.2f, 107.5);\n' \
                     % (pattern[0], pattern[1], blabel[0], blabel[0] + 5)
-    blabels_tikz += '  \draw[thick, black] (%.2f, 105) node[text width=20] {%s};\n' % (blabel[0] + 10, blabel[1])
+    blabels_tikz += '  \draw[thick, black] (%.2f, 105) node[text width=20, text height=5] {%s};\n' % (blabel[0] + 10, blabel[1])
 
   blabels_tikz += '\n'
 
@@ -166,7 +164,8 @@ def generate_tikz(args):
     blabels_tikz = ''
 
   # Generate entire tikz code and dump it to output file
-  tikz = header + gridlines + ymarks_tikz + ylabel_tikz + plot_data_tikz + xlabels_tikz + blabels_tikz + footer
+  body_tikz = gridlines_tikz + ymarks_tikz + ylabel_tikz + plot_data_tikz + xlabels_tikz + blabels_tikz
+  tikz = header_tikz + body_tikz + footer_tikz
   output = open(args.out, 'w')
   output.write(tikz)
 

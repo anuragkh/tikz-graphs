@@ -1,9 +1,12 @@
 \begin{tikzpicture}[xscale=0.10,yscale=0.10]
-  \draw[preaction={fill=black,opacity=.5, transform canvas={xshift=3,yshift=-3}}, black][fill=white] (0,0) rectangle (100, 100);
-    \draw[dashed, gray] (-1, 25) -- (101, 25);
+
+  \draw[preaction={fill=black,opacity=.5,transform canvas={xshift=3,yshift=-3}},black][fill=white] (0,0) rectangle (100, 100);
+
+  \draw[dashed, gray] (-1, 25) -- (101, 25);
   \draw[dashed, gray] (-1, 50) -- (101, 50);
   \draw[dashed, gray] (-1, 75) -- (101, 75);
-    \draw[thick, black] (-6, 25.00) node[align=right] {1.25};
+
+  \draw[thick, black] (-6, 25.00) node[align=right] {1.25};
   \draw[thick, black] (-6, 50.00) node[align=right] {2.5};
   \draw[thick, black] (-6, 75.00) node[align=right] {3.75};
 
@@ -26,10 +29,10 @@
   \draw[thick, black] (80.77, -5) node {C};
 
   \draw[thick, pattern=north east lines, pattern color=red] (0.00, 102.5) rectangle (5.00, 107.5);
-  \draw[thick, black] (10.00, 105) node[text width=20] {X};
-  \draw[thick, pattern=north west lines, pattern color=cyan] (33.00, 102.5) rectangle (38.00, 107.5);
-  \draw[thick, black] (43.00, 105) node[text width=20] {Y};
-  \draw[thick, pattern=grid, pattern color=green] (66.00, 102.5) rectangle (71.00, 107.5);
-  \draw[thick, black] (76.00, 105) node[text width=20] {Z};
+  \draw[thick, black] (10.00, 105) node[text width=20, text height=5] {X};
+  \draw[thick, pattern=north west lines, pattern color=cyan] (33.33, 102.5) rectangle (38.33, 107.5);
+  \draw[thick, black] (43.33, 105) node[text width=20, text height=5] {Y};
+  \draw[thick, pattern=grid, pattern color=green] (66.67, 102.5) rectangle (71.67, 107.5);
+  \draw[thick, black] (76.67, 105) node[text width=20, text height=5] {Z};
 
 \end{tikzpicture}
