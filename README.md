@@ -69,3 +69,9 @@ To generate ps, pdf or jpg files, use the `tikz2ps`,`tikz2pdf`, and `tikz2jpg` s
 
 * `tikz2pdf` requires pdflatex.
 * `tikz2jpg` requires gs (GhostScript).
+
+## Sample plots
+
+Bar Graph:
+
+![Image of Yaktocat](sample/pdf/bar.pdf)
