@@ -2,10 +2,14 @@
 
 from math import pow, log10, floor, ceil
 import argparse
+import re
 
 pattern_types_tikz = ['north east lines', 'north west lines', 'grid', 'crosshatch', 'dots', 'crosshatch dots']
 pattern_colors_tikz = ['red', 'cyan', 'green', 'black', 'gray', 'brown']
 patterns_tikz = zip(pattern_types_tikz, pattern_colors_tikz)
+
+def split(string):
+  return [token.strip('"') for token in re.findall(r'(?:"[^"]*"|[^\s"])+', string)]
 
 def compute_bar_widths(data):
   # Determine number of rows, cols; each row correspond to a 'bar-group', each col is a single 'bar'.
@@ -54,7 +58,7 @@ def generate_tikz(args):
   inp = open(args.data, 'r')
 
   # Get the bar labels
-  blabels = map(str, inp.readline().split())
+  blabels = map(str, split(inp.readline()))
   ncols = len(blabels)
 
   # Read the remainder of the file
@@ -85,7 +89,7 @@ def generate_tikz(args):
   ylabel_tikz = '  \\node (label-align) [thick, black, align=center, rotate=90] at (-12.5, 50) {%s};\n\n' % ylabel
 
   # Get the data to plot, and validate it
-  data = [map(float, line.split()[1:]) for line in file_data]
+  data = [map(float, split(line)[1:]) for line in file_data]
   validate_data(data, ncols)
 
   # Convert the data to logscale if requested
@@ -138,7 +142,7 @@ def generate_tikz(args):
     cur_bar_off += width
 
   # Generate x-axis labels
-  xlabels = [line.split()[0] for line in file_data]
+  xlabels = [split(line)[0] for line in file_data]
   xlabel_offsets = [width + x * (bar_grp_width + width) + 0.5 * bar_grp_width for x in range(0, len(xlabels))]
   xlabels_tikz = ''
   for xlabel in zip(xlabel_offsets, xlabels):
@@ -153,9 +157,10 @@ def generate_tikz(args):
   pattern_iter = iter(patterns_tikz)
   for blabel in zip(blabel_offsets, blabels):
     pattern = pattern_iter.next()
-    blabels_tikz += '  \draw[thick, pattern=%s, pattern color=%s] (%.2f, 102.5) rectangle (%.2f, 107.5);\n' \
-                    % (pattern[0], pattern[1], blabel[0], blabel[0] + 5)
-    blabels_tikz += '  \draw[thick, black] (%.2f, 105) node[text width=20, text height=5] {%s};\n' % (blabel[0] + 10, blabel[1])
+    draw_opts = 'thick, pattern=%s, pattern color=%s' % pattern
+    node_opts = 'midway,right=0.2,text height=5,text depth=0.1, anchor=west'
+    blabels_tikz += '  \draw[%s] (%.2f, 102.5) rectangle (%.2f, 107.5) node[%s] {%s};\n' \
+                    % (draw_opts, blabel[0], blabel[0] + 5, node_opts, blabel[1])
 
   blabels_tikz += '\n'
 
