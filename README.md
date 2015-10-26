@@ -1,8 +1,8 @@
-# TiKZ Graphs
+# TikZ Graphs
 
-Scripts to generate TiKZ code for bar graps and line plots.
+Scripts to generate TikZ code for bar graps and line plots.
 
-## Generating TiKZ code
+## Generating TikZ code
 
 Generating bar graphs:
 
@@ -11,7 +11,7 @@ usage: generate_tikz_bar.py [-h] -d DATA_FILE -o OUTPUT_FILE [--ymin YMIN]
                             [--ymax YMAX] [--ylabel YLABEL] [--xscale XSCALE]
                             [--yscale YSCALE] [--logscale] [--nolegend]
 
-Generates a TiKZ bar plot from an input file.
+Generates a TikZ bar plot from an input file.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -38,7 +38,7 @@ usage: generate_tikz_line.py [-h] -d DATA_FILE [DATA_FILE ...] -l LEGEND_ENTRY
                              [--xscale XSCALE] [--yscale YSCALE] [--logx]
                              [--logy] [--type TYPE]
 
-Generates a TiKZ bar plot from an input file.
+Generates a TikZ line/scatter plot from an input file.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -72,5 +72,5 @@ To generate ps, pdf or jpg files, use the `tikz2ps`,`tikz2pdf`, and `tikz2jpg` s
 
 ## Sample plots
 
-[Bar Graph](sample/pdf/bar.pdf)
-[Line Plot](sample/pdf/line.pdf)
+* [Bar Graph](sample/pdf/bar.pdf)
+* [Line Plot](sample/pdf/line.pdf)
